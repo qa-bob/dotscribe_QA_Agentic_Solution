@@ -1,83 +1,316 @@
-# dotScribe — QA Agentic Solution
+# dotScribe — QA Agentic Test Suite
 
-> Automated QA framework for [dotScribe](#) built with Playwright + TypeScript.
-
----
-
-## 🏢 Company Profile
-
-| Field | Details |
-|-------|---------|
-| **Company** | dotScribe |
-| **Description** | Healthcare documentation software |
-| **Website** | — |
-| **LinkedIn** | [View Profile](https://www.dotscribe.com/) |
-| **City** | Scottsdale |
-| **Founded** | 2020 |
-| **Funding** | $210 |
-| **Employees** | 1-10 |
-| **Industry** | Hospitals and Health Care |
-| **Category** | — |
-| **Leaders** | Aaron Barrett MD (CEO/Founder), Caryssa Barrett |
+Automated GUI, functional, and regression test suite for **[dotScribe](http://dotscribe.com)** — healthcare documentation software. Built with Playwright + TypeScript following a Page Object Model (POM) architecture, designed for agentic execution by Claude Code.
 
 ---
 
-## 🧪 QA Agentic Solution
+## Project Purpose
 
-This repository will contain a Playwright TypeScript test automation framework
-for **dotScribe**'s web application.
+This repository maintains a comprehensive regression test suite for the dotScribe marketing/product website. Tests cover every discoverable feature of the site without requiring account creation or form submission.
 
-### Planned Test Coverage
-
-- [ ] Smoke tests
-- [ ] Functional tests
-- [ ] Regression suite
-- [ ] Accessibility checks
-- [ ] Performance baselines
-
-### Tech Stack
-
-- [Playwright](https://playwright.dev/) — browser automation
-- TypeScript — strongly typed test code
-- GitHub Actions — CI/CD pipeline
-- AI-assisted test generation via GitHub Copilot
+**What is tested:**
+- Site availability and performance (smoke)
+- Navigation, routing, and menus
+- Contact form fields and validation (no submission)
+- Business logic and interactive features (functional)
+- Visual regression at pixel level (visual)
+- Responsive layout at mobile / tablet / desktop viewports
 
 ---
 
-## 🚀 Getting Started
+## Tech Stack
+
+| Tool | Purpose |
+|------|---------|
+| [Playwright](https://playwright.dev/) | Browser automation (Chromium, WebKit, Firefox) |
+| TypeScript (strict) | Strongly-typed test code |
+| Page Object Model | Encapsulates selectors and actions per page |
+| GitHub Actions | CI pipeline — runs on every PR |
+| Claude Code | Agentic test generation and maintenance |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ (`node --version`)
+- npm 9+ (`npm --version`)
+- Git
+
+### Installation
 
 ```bash
-# Install dependencies
+# 1. Clone the repository
+git clone https://github.com/<org>/dotscribe_QA_Agentic_Solution.git
+cd dotscribe_QA_Agentic_Solution
+
+# 2. Install Node dependencies
 npm install
 
-# Install Playwright browsers
-npx playwright install
+# 3. Install Playwright browsers
+npx playwright install --with-deps chromium
 
-# Run all tests
-npx playwright test
+# 4. Verify setup by running smoke tests
+npm run test:smoke
+```
 
-# Run tests with UI
-npx playwright test --ui
+### Environment Variables
+
+Copy `.env.example` to `.env` and fill in any overrides:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SITE_URL` | Value from `site.config.json` | Override target URL (e.g. staging) |
+| `CI` | — | Set to `true` in CI environments |
+
+---
+
+## Running Tests
+
+```bash
+# All tests
+npm test
+
+# By category
+npm run test:smoke          # @smoke — availability and page load
+npm run test:navigation     # @navigation — nav links and routing
+npm run test:forms          # @forms — form fields and validation
+npm run test:visual         # @visual — screenshot regression
+npm run test:responsive     # @responsive — layout at all viewports
+
+# Headed mode (see the browser)
+npm run test:headed
+
+# Update visual baselines
+npm run baseline
+
+# View the HTML report
+npm run report
+
+# TypeScript type-check
+npm run typecheck
+
+# Lint
+npm run lint
 ```
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 dotscribe_QA_Agentic_Solution/
+├── site.config.json              # Target URL, feature flags, viewport list
+├── playwright.config.ts          # Playwright: projects, reporters, timeouts
+├── global-setup.ts               # Pre-suite reachability check
+│
+├── src/
+│   ├── pages/
+│   │   ├── base.page.ts          # BasePage — shared helpers for all page objects
+│   │   ├── home.page.ts          # HomePage — hero, CTAs, main heading
+│   │   ├── navigation.page.ts    # NavigationPage — nav links, mobile menu
+│   │   ├── contact.page.ts       # ContactFormPage — form fields, validation
+│   │   └── *.page.ts             # One file per additional discovered page
+│   ├── fixtures/
+│   │   └── site.fixture.ts       # Custom test fixtures (extends Playwright test)
+│   ├── utils/
+│   │   ├── link-checker.ts       # HTTP link validation helper
+│   │   └── visual-helper.ts      # Screenshot comparison helper
+│   └── types/
+│       └── site-config.types.ts  # SiteConfig TypeScript interface
+│
 ├── tests/
 │   ├── smoke/
+│   │   └── site-availability.spec.ts
+│   ├── navigation/
+│   │   └── nav-links.spec.ts
+│   ├── forms/
+│   │   └── contact-form.spec.ts
 │   ├── functional/
-│   └── regression/
-├── pages/          # Page Object Models
-├── fixtures/       # Test data
-├── utils/          # Helpers
-├── playwright.config.ts
-├── package.json
-└── README.md
+│   │   └── *.spec.ts             # One file per business feature
+│   ├── visual/
+│   │   └── visual-regression.spec.ts
+│   ├── responsive/
+│   │   └── layout.spec.ts
+│   └── custom/
+│       └── *.spec.ts             # Site-specific tests generated by Claude Code
+│
+├── .claude/
+│   ├── agents/
+│   │   ├── site-analyzer.md      # Subagent: analyze a live site → site.config.json
+│   │   └── test-generator.md     # Subagent: generate custom test files
+│   ├── commands/
+│   │   ├── analyze-site.md       # /analyze-site slash command
+│   │   ├── generate-full-suite.md # /generate-full-suite slash command
+│   │   ├── run-smoke.md          # /run-smoke slash command
+│   │   ├── update-baseline.md    # /update-baseline slash command
+│   │   └── generate-report.md    # /generate-report slash command
+│   └── rules/
+│       ├── playwright-tests.md   # Path-scoped rules for tests/**
+│       └── page-objects.md       # Path-scoped rules for src/pages/**
+│
+├── .github/
+│   ├── workflows/
+│   │   ├── playwright.yml        # CI: run tests on every PR
+│   │   └── claude.yml            # Claude Code GitHub Action (@claude mentions)
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   └── test_request.md
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── copilot-instructions.md   # GitHub Copilot project instructions
+│
+├── AGENTS.md                     # AI assistant instructions (all tools)
+├── CLAUDE.md                     # Claude Code project instructions
+└── Skills.md                     # Available Claude Code skills/commands reference
 ```
 
 ---
 
-*Generated as part of the Phoenix Startup QA Agentic Solutions project.*
+## Test Tagging Reference
+
+Every test must carry at least one tag:
+
+| Tag | When to use |
+|-----|-------------|
+| `@smoke` | Site loads, title present, HTTP status OK, no crash errors |
+| `@navigation` | Nav links, routing, menus, breadcrumbs, mobile hamburger |
+| `@forms` | Form fields, validation messages, accessibility (no submission) |
+| `@functional` | Business features: pricing, search, video, accordion, CTA flows |
+| `@visual` | Screenshot regression with `toHaveScreenshot()` |
+| `@responsive` | Viewport-specific layout checks (mobile / tablet / desktop) |
+| `@custom` | Site-specific tests generated for dotScribe |
+
+---
+
+## Page Object Model (POM) Rules
+
+All selectors live in `src/pages/`. Tests import page objects via the fixture, not `page.locator()` directly.
+
+```typescript
+// Correct — use the fixture
+import { test, expect } from '@fixtures/site.fixture';
+
+test('hero heading is visible @smoke', async ({ homePage }) => {
+  const heading = await homePage.getMainHeading();
+  expect(heading).toBeTruthy();
+});
+
+// Wrong — never call page.locator() in the test body
+test('bad example', async ({ page }) => {
+  await expect(page.locator('h1')).toBeVisible(); // ❌
+});
+```
+
+Page object conventions:
+- Extend `BasePage` from `./base.page`
+- Locators are `readonly Locator` properties
+- Methods represent user actions (navigate, click, fill)
+- No `expect()` inside page objects — assertions belong in tests
+
+---
+
+## Contributor Guidelines
+
+### Before you start
+
+1. Read `site.config.json` — it defines the target URL and feature flags
+2. Run `npm run test:smoke` to confirm the site is reachable
+3. Check if a page object already exists for the page you're testing
+
+### Writing tests
+
+1. **Read `site.config.json`** to get the URL and feature flags
+2. **Inspect the live site** with `WebFetch` or your browser before writing selectors
+3. **Use real selectors** based on actual HTML — no generic placeholders
+4. **Create or update** the relevant page object in `src/pages/`
+5. **Write tests** using the page object, not raw locators
+6. **Run `npm run typecheck`** — all code must pass TypeScript strict mode
+7. **Run `npm run lint`** before opening a PR
+
+### What not to do
+
+- Submit any form
+- Create accounts or log in (unless `auth.required: true` in `site.config.json`)
+- Hardcode the base URL — always use `baseURL` from Playwright config
+- Put assertions inside page object methods
+- Use `page.waitForTimeout()` — use `waitForSelector` or Playwright auto-waiting
+- Use the `any` type without a comment explaining why
+
+### Commit message format
+
+```
+type(scope): short description
+
+feat(navigation): add mobile menu toggle test
+fix(smoke): filter out blocked-by-client network errors
+test(forms): add email validation boundary cases
+docs(readme): update getting started steps
+```
+
+---
+
+## Claude Code Integration
+
+This repository is fully configured for [Claude Code](https://code.claude.com) agentic workflows.
+
+### Available slash commands
+
+| Command | Description |
+|---------|-------------|
+| `/analyze-site` | Crawl the live site and update `site.config.json` |
+| `/generate-full-suite` | Generate complete POM classes and test files |
+| `/run-smoke` | Run smoke tests and summarize results |
+| `/update-baseline` | Refresh all visual regression snapshots |
+| `/generate-report` | Produce a formatted test results summary |
+
+### Sub-agents
+
+| Agent | Role |
+|-------|------|
+| `site-analyzer` | Crawls a live URL and produces `site.config.json` |
+| `test-generator` | Reads config and generates site-specific test files |
+
+See `Skills.md` for the full skills reference and `AGENTS.md` for AI assistant guidelines.
+
+---
+
+## CI/CD
+
+GitHub Actions runs the full test suite on every pull request and push to `main`.
+
+| Workflow | Trigger | What it does |
+|----------|---------|-------------|
+| `playwright.yml` | PR, push to main | Installs deps, runs all tests, uploads HTML report |
+| `claude.yml` | `@claude` mention in PR/issue | Delegates to Claude Code for analysis or test generation |
+
+Set the `ANTHROPIC_API_KEY` secret in repository Settings → Secrets to enable the Claude workflow.
+
+---
+
+## Configuration
+
+### `site.config.json` fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Company / site name |
+| `url` | string | Canonical site URL |
+| `hasContactForm` | boolean | Set to `true` if a contact form exists |
+| `expectedNavItems` | string[] | Nav link text values for navigation tests |
+| `viewports` | string[] | Which viewport sizes to test |
+| `skipVisual` | boolean | Skip visual tests (for heavily animated sites) |
+| `skipForms` | boolean | Skip form tests (for auth-gated sites) |
+| `auth.required` | boolean | Set `true` only if the site requires login |
+
+---
+
+## Support
+
+- Open a bug report: `.github/ISSUE_TEMPLATE/bug_report.md`
+- Request new test coverage: `.github/ISSUE_TEMPLATE/test_request.md`
+- Questions about Claude Code: [docs.anthropic.com/en/docs/claude-code](https://code.claude.com/docs)

@@ -10,10 +10,13 @@
  */
 
 import { test as base, expect } from '@playwright/test';
-import { loadSiteConfig, type SiteConfig } from '@types/site-config.types';
+import { loadSiteConfig, type SiteConfig } from '@site-types/site-config.types';
 import { HomePage } from '@pages/home.page';
 import { NavigationPage } from '@pages/navigation.page';
 import { ContactFormPage } from '@pages/contact.page';
+import { PricingPage } from '@pages/pricing.page';
+import { AboutPage } from '@pages/about.page';
+import { BlogPage } from '@pages/blog.page';
 
 // ── Fixture type definitions ─────────────────────────────────────────────────
 
@@ -26,6 +29,12 @@ export interface Fixtures {
   navigationPage: NavigationPage;
   /** ContactFormPage page object (does not auto-navigate) */
   contactPage: ContactFormPage;
+  /** PricingPage page object (does not auto-navigate) */
+  pricingPage: PricingPage;
+  /** AboutPage page object (does not auto-navigate) */
+  aboutPage: AboutPage;
+  /** BlogPage page object (does not auto-navigate) */
+  blogPage: BlogPage;
 }
 
 // ── Extended test object ─────────────────────────────────────────────────────
@@ -66,6 +75,33 @@ export const test = base.extend<Fixtures>({
   contactPage: async ({ page, siteConfig }, use) => {
     const contactPage = new ContactFormPage(page, siteConfig);
     await use(contactPage);
+  },
+
+  /**
+   * pricingPage — constructs PricingPage without navigating.
+   * Call pricingPage.navigate() in tests.
+   */
+  pricingPage: async ({ page, siteConfig }, use) => {
+    const pricingPage = new PricingPage(page, siteConfig);
+    await use(pricingPage);
+  },
+
+  /**
+   * aboutPage — constructs AboutPage without navigating.
+   * Call aboutPage.navigate() in tests.
+   */
+  aboutPage: async ({ page, siteConfig }, use) => {
+    const aboutPage = new AboutPage(page, siteConfig);
+    await use(aboutPage);
+  },
+
+  /**
+   * blogPage — constructs BlogPage without navigating.
+   * Call blogPage.navigate() in tests.
+   */
+  blogPage: async ({ page, siteConfig }, use) => {
+    const blogPage = new BlogPage(page, siteConfig);
+    await use(blogPage);
   },
 });
 

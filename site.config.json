@@ -1,23 +1,21 @@
-﻿{
-    "name":  "dotScribe",
-    "url":  "http://dotscribe.com",
-    "description":  "",
-    "industry":  "",
-    "hasContactForm":  true,
-    "expectedNavItems":  [
-
-                         ],
-    "viewports":  [
-                      "desktop",
-                      "mobile",
-                      "tablet"
-                  ],
-    "skipVisual":  false,
-    "skipForms":  false,
-    "auth":  {
-                 "required":  false,
-                 "loginUrl":  "",
-                 "username":  "",
-                 "password":  ""
-             }
+{
+    "name": "dotScribe",
+    "url": "https://www.dotscribe.com",
+    "description": "AI-powered medical documentation and education assistant for healthcare providers",
+    "industry": "Healthcare / Medical SaaS",
+    "hasContactForm": false,
+    "expectedNavItems": ["Overview", "Pricing", "About Us", "Blog | News"],
+    "viewports": [
+        "desktop",
+        "mobile",
+        "tablet"
+    ],
+    "skipVisual": false,
+    "skipForms": true,
+    "auth": {
+        "required": false,
+        "loginUrl": "https://library.dotscribe.com/login",
+        "username": "",
+        "password": ""
+    }
 }

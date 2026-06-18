@@ -55,7 +55,9 @@ test.describe('Site Availability @smoke', () => {
       consoleErrors.push(`[pageerror] ${err.message}`);
     });
 
-    await page.goto(siteConfig.url, { waitUntil: 'networkidle' });
+    // Use 'load' (not 'networkidle') — Wix sites with embedded video and
+    // analytics scripts never reach networkidle within the 30s test timeout.
+    await page.goto(siteConfig.url, { waitUntil: 'load' });
 
     // Filter out known benign third-party errors (analytics, ads, etc.)
     const criticalErrors = consoleErrors.filter((err) => {
