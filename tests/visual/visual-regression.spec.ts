@@ -6,9 +6,13 @@
  *
  * Covers: homepage (3 viewports), pricing page (desktop), about page (desktop).
  *
+ * Each test runs only in the Playwright project whose viewport it targets, and
+ * is skipped (not failed) until a baseline has been captured for it.
+ *
  * Tag: @visual
  */
 
+import * as fs from 'fs';
 import { test, expect } from '@fixtures/site.fixture';
 import { dismissCookieBanner } from '@utils/visual-helper';
 
@@ -20,6 +24,14 @@ const SCREENSHOT_OPTIONS = {
   fullPage: true,
 } as const;
 
+const VISUAL_CASES = [
+  { name: 'homepage', label: 'desktop', project: 'chromium-desktop', path: '', snapshot: 'homepage-desktop.png' },
+  { name: 'homepage', label: 'mobile', project: 'mobile-chrome', path: '', snapshot: 'homepage-mobile.png' },
+  { name: 'homepage', label: 'tablet', project: 'tablet', path: '', snapshot: 'homepage-tablet.png' },
+  { name: 'pricing page', label: 'desktop', project: 'chromium-desktop', path: '/pricing', snapshot: 'pricing-desktop.png' },
+  { name: 'about page', label: 'desktop', project: 'chromium-desktop', path: '/about-us', snapshot: 'about-desktop.png' },
+] as const;
+
 test.describe('Visual Regression @visual', () => {
   // Skip entire suite when site config opts out
   test.beforeEach(async ({ siteConfig }) => {
@@ -28,72 +40,25 @@ test.describe('Visual Regression @visual', () => {
     }
   });
 
-  // ── Homepage — Desktop ───────────────────────────────────────────────────────
+  for (const { name, label, project, path, snapshot } of VISUAL_CASES) {
+    test(`${name} visual regression - ${label} @visual`, async ({ page, siteConfig }, testInfo) => {
+      test.skip(testInfo.project.name !== project, `Runs only in the "${project}" project`);
 
-  test('homepage visual regression - desktop @visual', async ({ page, siteConfig }) => {
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto(siteConfig.url, { waitUntil: 'networkidle' });
-    await dismissCookieBanner(page);
-    await page.waitForTimeout(500);
+      // Only `--update-snapshots` (all/changed) should create a missing baseline
+      const isUpdating = ['all', 'changed'].includes(testInfo.config.updateSnapshots);
+      const baselinePath = testInfo.snapshotPath(snapshot, { kind: 'screenshot' });
+      test.skip(
+        !isUpdating && !fs.existsSync(baselinePath),
+        `No baseline at ${baselinePath} — run "npm run baseline" to capture one`
+      );
 
-    await expect(page).toHaveScreenshot('homepage-desktop.png', {
-      ...SCREENSHOT_OPTIONS,
+      const url = path ? `${siteConfig.url.replace(/\/$/, '')}${path}` : siteConfig.url;
+      await page.goto(url, { waitUntil: 'load' });
+
+      // Dismiss any cookie/consent banners that would interfere with comparison
+      await dismissCookieBanner(page);
+
+      await expect(page).toHaveScreenshot(snapshot, { ...SCREENSHOT_OPTIONS });
     });
-  });
-
-  // ── Homepage — Mobile ────────────────────────────────────────────────────────
-
-  test('homepage visual regression - mobile @visual', async ({ page, siteConfig }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(siteConfig.url, { waitUntil: 'networkidle' });
-    await dismissCookieBanner(page);
-    await page.waitForTimeout(500);
-
-    await expect(page).toHaveScreenshot('homepage-mobile.png', {
-      ...SCREENSHOT_OPTIONS,
-    });
-  });
-
-  // ── Homepage — Tablet ────────────────────────────────────────────────────────
-
-  test('homepage visual regression - tablet @visual', async ({ page, siteConfig }) => {
-    await page.setViewportSize({ width: 768, height: 1024 });
-    await page.goto(siteConfig.url, { waitUntil: 'networkidle' });
-    await dismissCookieBanner(page);
-    await page.waitForTimeout(500);
-
-    await expect(page).toHaveScreenshot('homepage-tablet.png', {
-      ...SCREENSHOT_OPTIONS,
-    });
-  });
-
-  // ── Pricing Page — Desktop ───────────────────────────────────────────────────
-
-  test('pricing page visual regression - desktop @visual', async ({ page, siteConfig }) => {
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto(`${siteConfig.url.replace(/\/$/, '')}/pricing`, {
-      waitUntil: 'networkidle',
-    });
-    await dismissCookieBanner(page);
-    await page.waitForTimeout(500);
-
-    await expect(page).toHaveScreenshot('pricing-desktop.png', {
-      ...SCREENSHOT_OPTIONS,
-    });
-  });
-
-  // ── About Page — Desktop ─────────────────────────────────────────────────────
-
-  test('about page visual regression - desktop @visual', async ({ page, siteConfig }) => {
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto(`${siteConfig.url.replace(/\/$/, '')}/about-us`, {
-      waitUntil: 'networkidle',
-    });
-    await dismissCookieBanner(page);
-    await page.waitForTimeout(500);
-
-    await expect(page).toHaveScreenshot('about-desktop.png', {
-      ...SCREENSHOT_OPTIONS,
-    });
-  });
+  }
 });
