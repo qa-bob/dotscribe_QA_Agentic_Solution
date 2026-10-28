@@ -20,60 +20,71 @@ test.describe('Navigation @navigation', () => {
 
   // ── Visibility ──────────────────────────────────────────────────────────────
 
-  test('navigation menu is visible @navigation', async ({ navigationPage }) => {
+  test('navigation menu is visible @navigation', async ({ navigationPage }, testInfo) => {
+    // Small viewports usually hide the nav behind a toggle — covered by the mobile nav test
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const isVisible = await navigationPage.isNavVisible();
     expect(isVisible, 'A nav / [role="navigation"] element should be visible').toBeTruthy();
   });
 
   // ── Expected items ──────────────────────────────────────────────────────────
 
-  test('nav contains "Overview" link @navigation', async ({ page, siteConfig }) => {
+  test('nav contains "Overview" link @navigation', async ({ page, siteConfig }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const link = page.getByRole('link', { name: /overview/i }).first();
     await expect(link).toBeVisible();
   });
 
-  test('nav contains "Pricing" link @navigation', async ({ page }) => {
+  test('nav contains "Pricing" link @navigation', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const link = page.getByRole('link', { name: /pricing/i }).first();
     await expect(link).toBeVisible();
   });
 
-  test('nav contains "About Us" link @navigation', async ({ page }) => {
+  test('nav contains "About Us" link @navigation', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const link = page.getByRole('link', { name: /about us/i }).first();
     await expect(link).toBeVisible();
   });
 
-  test('nav contains "Blog" or "News" link @navigation', async ({ page }) => {
+  test('nav contains "Blog" or "News" link @navigation', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const link = page.getByRole('link', { name: /blog|news/i }).first();
     await expect(link).toBeVisible();
   });
 
-  test('header has "START FREE TRIAL" button @navigation', async ({ page }) => {
+  test('header has "START FREE TRIAL" button @navigation', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const cta = page.getByRole('link', { name: /start free trial/i }).first();
     await expect(cta).toBeVisible();
   });
 
-  test('header has "SIGN IN" button @navigation', async ({ page }) => {
+  test('header has "SIGN IN" button @navigation', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const signIn = page.getByRole('link', { name: /sign in/i }).first();
     await expect(signIn).toBeVisible();
   });
 
   // ── Link routing ────────────────────────────────────────────────────────────
 
-  test('"Pricing" nav link navigates to /pricing @navigation', async ({ page, siteConfig }) => {
+  test('"Pricing" nav link navigates to /pricing @navigation', async ({ page, siteConfig }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const link = page.getByRole('link', { name: /pricing/i }).first();
     await link.click();
     await page.waitForLoadState('domcontentloaded');
     expect(page.url()).toContain('/pricing');
   });
 
-  test('"About Us" nav link navigates to /about-us @navigation', async ({ page, siteConfig }) => {
+  test('"About Us" nav link navigates to /about-us @navigation', async ({ page, siteConfig }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const link = page.getByRole('link', { name: /about us/i }).first();
     await link.click();
     await page.waitForLoadState('domcontentloaded');
     expect(page.url()).toContain('/about-us');
   });
 
-  test('"Blog" nav link navigates to /blog-news @navigation', async ({ page }) => {
+  test('"Blog" nav link navigates to /blog-news @navigation', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'chromium-desktop', 'Runs only in the "chromium-desktop" project');
     const link = page.getByRole('link', { name: /blog|news/i }).first();
     await link.click();
     await page.waitForLoadState('domcontentloaded');
@@ -85,10 +96,7 @@ test.describe('Navigation @navigation', () => {
   test('all nav links are reachable (no 404s) @navigation', async ({ navigationPage }) => {
     const results = await navigationPage.checkAllNavLinksReachable();
 
-    if (results.length === 0) {
-      console.warn('[navigation] No nav links found to check — skipping reachability assertion.');
-      return;
-    }
+    test.skip(results.length === 0, 'No nav links found to check');
 
     // Exclude external domains (library subdomain, social media) from 404 check
     const internalResults = results.filter(
@@ -117,7 +125,8 @@ test.describe('Navigation @navigation', () => {
 
   // ── Mobile nav ──────────────────────────────────────────────────────────────
 
-  test('mobile nav menu toggles correctly @navigation', async ({ navigationPage, page }) => {
+  test('mobile nav menu toggles correctly @navigation', async ({ navigationPage, page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-chrome', 'Runs only in the "mobile-chrome" project');
     await page.setViewportSize({ width: 390, height: 844 });
     await navigationPage.navigate();
     await navigationPage.waitForLoad();
@@ -150,10 +159,7 @@ test.describe('Navigation @navigation', () => {
   }) => {
     const navLinks = await navigationPage.getNavLinks();
 
-    if (navLinks.length === 0) {
-      console.warn('[navigation] No nav links found — skipping text quality check.');
-      return;
-    }
+    test.skip(navLinks.length === 0, 'No nav links found');
 
     const badPhrases = /^(click here|here|more|read more|learn more|link|go)$/i;
     const genericLinks = navLinks.filter((link) => badPhrases.test(link.text.trim()));
@@ -174,10 +180,7 @@ test.describe('Navigation @navigation', () => {
         'header a[href="https://www.dotscribe.com"], header a[href="https://www.dotscribe.com/"]'
     ).first();
 
-    if (await logoLink.count() === 0) {
-      console.warn('[navigation] Could not identify a logo link — skipping this assertion.');
-      return;
-    }
+    test.skip(await logoLink.count() === 0, 'Could not identify a logo link');
 
     const href = await logoLink.getAttribute('href');
     expect(href).not.toBeNull();
